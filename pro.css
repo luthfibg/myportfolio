@@ -1,0 +1,149 @@
+@import 'root.css';
+
+:root {
+  --vlysze: #fcd2c0;
+  --freila: #7eb6c0;
+  --elve: #c26b5d;
+  --niruana: #628498;
+}
+
+.cover {
+  width: 100%;
+  height: 40%;
+}
+
+.cover.cover-bmdm {
+  background-color: var(--vlysze);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* i {
+  position: relative;
+} */
+i.i-1 {
+  left: 3%;
+  top: 8%;
+}
+i.i-2,
+i.i-9 {
+  left: 40%;
+  /* margin-top: 3%; */
+  color: var(--niruana);
+}
+i.i-3,
+i.i-10 {
+  left: 0%;
+  /* margin-top: 27%; */
+  color: var(--niruana);
+}
+i.i-4 {
+  left: 16%;
+  /* margin-top: 13%; */
+}
+i.i-5,
+i.i-12 {
+  left: 35%;
+  /* margin-top: 19%; */
+  color: var(--niruana);
+}
+i.i-6 {
+  left: 74%;
+  /* margin-top: 18%; */
+}
+i.i-7 {
+  left: 63%;
+  /* margin-top: 5%; */
+}
+
+.container.container-pro {
+  /* padding-top: 3rem; */
+  background: var(--rain);
+  padding: 0 2rem;
+}
+
+h1.pro-title {
+  font-size: 1.9rem !important;
+}
+
+.container.container-pro .row {
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.row.positioner [class*='col-'] {
+  display: flex;
+  justify-content: end;
+}
+.row [class*='col-'] a.box-btn.sm {
+  display: none;
+}
+.row [class*='col-'] a.box-btn {
+  display: block flex;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
+  color: var(--niruana);
+  height: 2.5rem;
+  border: 0.1rem solid var(--niruana);
+}
+
+.row [class*='col-'] a.box-btn:hover {
+  box-shadow: 0 0 0.5rem var(--raven);
+}
+
+.container-pro section {
+  width: 100%;
+}
+
+.container-pro section .about-pro-title {
+  font-weight: 600;
+}
+
+.container-pro section .about-pro-about {
+  text-align: justify;
+}
+
+.container-pro section .row {
+  margin: 0;
+}
+
+.container-pro section .row .row.child-row {
+  padding: 0.5rem 0;
+}
+
+.container-pro section .row .row.child-row [class*='col-']:nth-last-of-type(1) {
+  text-align: end;
+}
+
+.container-pro section .row .info-graphic {
+  padding: 0.5rem;
+  border: 0.1rem solid var(--niruana);
+}
+
+@media (max-width: 576px) and (orientation: portrait) {
+  h1.pro-title {
+    font-size: 1.5rem !important;
+  }
+
+  h4.about-pro-title {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .row.row-bmdm [class*='col-'] {
+    padding: 0;
+  }
+  .row [class*='col-'] a.box-btn {
+    width: 100%;
+  }
+  .row [class*='col-'] a.box-btn.md {
+    display: none;
+  }
+  .row [class*='col-'] a.box-btn.sm {
+    display: block flex;
+  }
+}

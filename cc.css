@@ -1,0 +1,56 @@
+@import 'root.css';
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+.container {
+  /* height: 100vh; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* .container.container-cro {
+  width: 100vw;
+} */
+
+h1.cc-heading {
+  font-weight: 700 !important;
+  color: black;
+}
+
+.container-cro .subheading a.regist-link {
+  color: var(--virco);
+}
+.container .row a {
+  transition: 1s;
+  text-decoration: none;
+  color: black;
+}
+
+.container .row a:hover {
+  transform: scale(1.05) !important;
+  cursor: pointer;
+}
+
+.card-wrapper.row {
+  margin-top: 2rem;
+}
+
+.row .card {
+  height: 23rem;
+  overflow: hidden;
+}
+.card-header {
+  opacity: 0.6;
+}
+
+.iconfaw {
+  text-align: center;
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+  h1.heading {
+    font-size: 1.3rem;
+  }
+}

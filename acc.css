@@ -1,0 +1,38 @@
+/* .container {
+  padding: 0;
+} */
+
+section.section-table {
+  padding: 1rem 5rem;
+  width: 100%;
+}
+
+.section-table caption {
+  color: var(--virco);
+}
+
+.container .modal .modal-dialog form textarea {
+  resize: none;
+  height: 6rem;
+}
+.container.container-ce {
+  padding: 3rem 0;
+}
+.container.container-ce form {
+  width: 80%;
+}
+
+/* tr td.op a {
+  width: fit-content;
+} */
+
+@media (max-width: 576px) and (orientation: portrait) {
+  section.section-table {
+    padding: 0 1rem;
+  }
+}
+@media (min-width: 768px) and (orientation: landscape) {
+  .container.container-ce form {
+    width: 60%;
+  }
+}

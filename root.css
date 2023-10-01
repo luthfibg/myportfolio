@@ -1,0 +1,29 @@
+:root {
+  /* Colors Theme */
+  --light: #eeeeff;
+  --iron: #ced1d6;
+  --ghost: #c7cbd4;
+  --rain: rgb(231, 231, 231);
+  --gray-chateau: #767d89;
+  --raven: #767d89;
+  --inputs: #3c4452;
+  --bright-gray: #3c4452;
+  --mirage: #1a202c;
+  --vulcan: #10151e;
+  --vulcan-fade: rgba(16, 21, 30, 0.8);
+
+  --virco: rgb(255, 103, 103);
+  --belooz: rgb(124, 180, 180);
+  --belooz-half: rgba(124, 180, 180, 0.5);
+  --astro-blue: #01435a;
+  --cerulean: #00bfff;
+  --onahau: #bdeeff;
+  --crimson: #de1533;
+  --amber: #ffbf00;
+  --byzantium: #702963;
+  --eucalyptus: #5f8575;
+}
+
+.night-mode {
+  --rain: var(--mirage);
+}

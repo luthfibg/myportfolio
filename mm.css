@@ -1,0 +1,61 @@
+:root {
+  --necro: rgb(61, 62, 70);
+  --tyrva: rgb(255, 80, 80);
+}
+
+.container.mm,
+.container.mm .row,
+.container.mm .row .col-12 {
+  width: 100%;
+  height: 100%;
+}
+
+section.section-mm:not(section.section-mm:nth-of-type(1), section.section-mm:nth-of-type(2)) {
+  border-top: 0.1rem solid var(--necro);
+  height: fit-content;
+}
+
+h1.memorynatia-title {
+  color: var(--necro);
+}
+section.section-mm a {
+  text-decoration: none;
+  color: var(--necro);
+}
+
+section.section-mm.navi a {
+  color: var(--tyrva);
+}
+
+section.section-mm .splitter {
+  height: 0.5rem;
+  width: 5rem;
+  border-bottom: 0.2rem solid var(--tyrva);
+}
+
+section.section-mm p {
+  text-align: center;
+}
+
+section.section-mm.panel-group a.collapse-link {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--necro) !important;
+}
+
+section.section-mm.collapse {
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 425px) and (orientation: portrait) {
+  video {
+    width: 320px;
+    height: 180px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1440px) and (orientation: landscape) {
+  video {
+    width: 620px;
+    height: 350px;
+  }
+}
