@@ -86,12 +86,25 @@ if (isset($_POST["submit_message"])) {
 require("layout/header.php");
 ?>
 
+<?php
+// Ambil URL avatar dari database
+$adminId = 1; // ID pengguna yang sedang login
+$query = "SELECT avatar_url FROM admins WHERE admin_id = :admin_id";
+$stmt = $conn->prepare($query);
+$stmt->bindParam(':admin_id', $adminId, PDO::PARAM_INT);
+$stmt->execute();
+
+// Ambil hasilnya
+$admin = $stmt->fetch(PDO::FETCH_ASSOC);
+$avatarUrl = $admin['avatar_url'];
+?>
+
 
 <div class="xcon">
   <!-- section 1 -->
   <section class="section one" id="top">
     <div class="section__content">
-      <img src="assets/profile.png" alt="myphoto" class="mb-3" />
+      <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="myphoto" class="mb-3" />
       <h1>Halo, Saya Muhamad <a class="secret-link" href="login.php" target="_blank">Luthfi</a></h1>
       <div class="animated-text">Saya&nbsp;<span></span></div>
       <div class="btn-wrapper">

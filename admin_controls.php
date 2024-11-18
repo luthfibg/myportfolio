@@ -193,6 +193,92 @@ if (isset($_POST['submit_update_ss'])) {
 
 }
 
+$clientId = 'e5c485b20b7c757';
+$clientSecret = 'a13294bb9f34c837d780807a215be947d36e5892';
+
+// Pastikan file di-upload
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_change_avatar'])) {
+    $file = $_FILES['avatar'];
+
+    // Validasi apakah file adalah gambar
+    $validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (in_array($file['type'], $validTypes)) {
+        
+        // Baca file gambar dalam format base64
+        $imageData = file_get_contents($file['tmp_name']);
+        $base64Image = base64_encode($imageData);
+        
+        // Siapkan data untuk dikirim ke API Imgur
+        $postData = [
+            'image' => $base64Image,
+            'type'  => 'base64', // Menyatakan bahwa file dalam format base64
+        ];
+        
+        // Kirim POST request ke API Imgur
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.imgur.com/3/image');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Client-ID ' . $clientId,
+        ]);
+        
+        // Eksekusi request dan ambil respons
+        $response = curl_exec($ch);
+        curl_close($ch);
+        
+        // Decode JSON response dari Imgur
+        $responseData = json_decode($response, true);
+        
+        if ($responseData['success']) {
+            // Ambil URL gambar yang diupload
+            $imageUrl = $responseData['data']['link'];
+
+            // echo "Upload berhasil! URL Avatar: " . $imageUrl;
+            try {
+                // Ambil ID pengguna (misalnya dari session)
+                $adminId = 1; // Gantilah dengan ID pengguna yang sesuai
+
+                // Siapkan query untuk update URL avatar
+                $updateQuery = "UPDATE admins SET avatar_url = :avatar_url WHERE admin_id = :admin_id";
+                $stmt = $conn->prepare($updateQuery);
+                
+                // Bind parameter dan eksekusi query
+                $stmt->bindParam(':avatar_url', $imageUrl, PDO::PARAM_STR);
+                $stmt->bindParam(':admin_id', $adminId, PDO::PARAM_INT);
+                
+                $stmt->execute();
+                
+                // Cek apakah update berhasil
+                if ($stmt->rowCount() > 0) {
+                    // echo "Avatar berhasil diperbarui!";
+                } else {
+                    echo "Tidak ada perubahan pada avatar (mungkin ID pengguna tidak ditemukan).";
+                }
+            } catch (PDOException $e) {
+                echo "Gagal memperbarui avatar: " . $e->getMessage();
+            }
+
+            // Simpan URL gambar avatar ke database atau sesi
+            // Misalnya: updateAvatarInDatabase($imageUrl);
+        } else {
+            echo "Terjadi kesalahan saat mengupload gambar: " . $responseData['data']['error'];
+        }
+    } else {
+        echo "File yang diupload bukan gambar yang valid.";
+    }
+}
+
+$query = "SELECT avatar_url FROM admins WHERE admin_id = :admin_id";
+$stmt = $conn->prepare($query);
+$stmt->bindParam(':admin_id', $adminId, PDO::PARAM_INT);
+$stmt->execute();
+
+// Ambil hasilnya
+$admin = $stmt->fetch(PDO::FETCH_ASSOC);
+$avatarUrl = $admin['avatar_url'];
+
 
 ?>
 
@@ -200,53 +286,45 @@ if (isset($_POST['submit_update_ss'])) {
 <div class="container flex-column pb-5">
     <h3 class="acc-title my-5">Admin Controls Center</h3>
 
+    <!-- edit photo profile -->
+    <section class="section-table table-responsive">
+        <table class="table caption-top table-striped">
+            <caption>Foto Profil</caption>
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div class="img-wrapper mb-3 rounded-circle" style="width: 10rem; height: 10rem">
+            <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="avatar rounded-circle w-100 h-100">
+        </div>
+
+        <div class="row-action w-100 py-2">
+            <div class="modal fade" id="add-edu-modal" tabindex="-1" aria-labelledby="add-edu-modal"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Ganti Foto</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form action="" method="POST" class="flex flex-column p-3" enctype="multipart/form-data">
+                            <label for="avatar">Ganti foto:</label>
+                            <input type="file" name="avatar" required>
+                            <input type="submit" name="submit_change_avatar" class="form-control btn" value="Upload">
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-edu-modal">
+                <i class="fa-solid fa-arrows-rotate"></i>&nbsp;Ganti
+            </a>
+        </div>
+    </section>
     <section class="section-table table-responsive">
         <table class="table table-bordered border-danger-subtle caption-top table-striped">
             <caption>Daftar Pendidikan</caption>
-            <div class="row-action w-100 py-2">
-                <!-- Add edu Modal -->
-
-                <div class="modal fade" id="add-edu-modal" tabindex="-1" aria-labelledby="add-edu-modal"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Data Pendidikan</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <form action="" method="POST">
-                                <div class="modal-body">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="eduname" id="floatingEduname"
-                                            placeholder="Pendidikan" autocomplete="off" />
-                                        <label for="floatingEduname">Pendidikan</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="eduyear" id="floatingEduyear"
-                                            placeholder="Jangka Tahun" autocomplete="off" />
-                                        <label for="floatingEduyear">Jangka Tahun</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <textarea class="form-control" name="edudesc" placeholder="Leave a comment here"
-                                            id="floatingTextarea"></textarea>
-                                        <label for="floatingTextarea">Deskripsi</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="submit" class="form-control btn" name="submit_add_edu" id="submitEdu"
-                                        value="Upload" />
-                                    <button type="button" class="form-control btn btn-secondary close-modal-acc"
-                                        data-bs-dismiss="modal">Tutup</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-edu-modal">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
-                </a>
-            </div>
             <thead>
                 <tr>
                     <th scope="col" class="text-center">id</th>
@@ -343,54 +421,53 @@ if (isset($_POST['submit_update_ss'])) {
                 ?>
             </tbody>
         </table>
+        <div class="row-action w-100 py-2">
+            <!-- Add edu Modal -->
+            <div class="modal fade" id="add-edu-modal" tabindex="-1" aria-labelledby="add-edu-modal"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Data Pendidikan</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form action="" method="POST">
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="eduname" id="floatingEduname"
+                                        placeholder="Pendidikan" autocomplete="off" />
+                                    <label for="floatingEduname">Pendidikan</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="eduyear" id="floatingEduyear"
+                                        placeholder="Jangka Tahun" autocomplete="off" />
+                                    <label for="floatingEduyear">Jangka Tahun</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" name="edudesc" placeholder="Leave a comment here"
+                                        id="floatingTextarea"></textarea>
+                                    <label for="floatingTextarea">Deskripsi</label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" class="form-control btn" name="submit_add_edu" id="submitEdu"
+                                    value="Upload" />
+                                <button type="button" class="form-control btn btn-secondary close-modal-acc"
+                                    data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-edu-modal">
+                <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
+            </a>
+        </div>
     </section>
     <section class="section-table table-responsive">
         <table class="table table-bordered border-danger-subtle caption-top table-striped">
             <caption>Daftar Pengalaman</caption>
-            <div class="row-action w-100 py-2">
-                <!-- Add exp Modal -->
-
-                <div class="modal fade" id="add-exp-modal" tabindex="-1" aria-labelledby="add-exp-modal"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Data Pengalaman</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <form action="" method="POST">
-                                <div class="modal-body">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="expname" id="floatingExpname"
-                                            placeholder="Pengalaman" autocomplete="off" />
-                                        <label for="floatingExpname">Pengalaman</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="expyear" id="floatingExpyear"
-                                            placeholder="Jangka Tahun" autocomplete="off" />
-                                        <label for="floatingExpyear">Jangka Tahun</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <textarea class="form-control" name="expdesc" placeholder="Leave a comment here"
-                                            id="floatingTextarea"></textarea>
-                                        <label for="floatingTextarea">Deskripsi</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="submit" class="form-control btn" name="submit_add_exp" id="submitExp"
-                                        value="Upload" />
-                                    <button type="button" class="form-control btn btn-secondary close-modal-acc"
-                                        data-bs-dismiss="modal">Tutup</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-exp-modal">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
-                </a>
-            </div>
             <thead>
                 <tr>
                     <th scope="col" class="text-center">id</th>
@@ -487,52 +564,55 @@ if (isset($_POST['submit_update_ss'])) {
                 ?>
             </tbody>
         </table>
+        <div class="row-action w-100 py-2">
+            <!-- Add exp Modal -->
+
+            <div class="modal fade" id="add-exp-modal" tabindex="-1" aria-labelledby="add-exp-modal"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Data Pengalaman</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form action="" method="POST">
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="expname" id="floatingExpname"
+                                        placeholder="Pengalaman" autocomplete="off" />
+                                    <label for="floatingExpname">Pengalaman</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="expyear" id="floatingExpyear"
+                                        placeholder="Jangka Tahun" autocomplete="off" />
+                                    <label for="floatingExpyear">Jangka Tahun</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" name="expdesc" placeholder="Leave a comment here"
+                                        id="floatingTextarea"></textarea>
+                                    <label for="floatingTextarea">Deskripsi</label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" class="form-control btn" name="submit_add_exp" id="submitExp"
+                                    value="Upload" />
+                                <button type="button" class="form-control btn btn-secondary close-modal-acc"
+                                    data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-exp-modal">
+                <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
+            </a>
+        </div>
     </section>
     <section class="section-table table-responsive">
         <table class="table table-bordered border-danger-subtle caption-top table-striped">
             <caption>Daftar Hardskills</caption>
-            <div class="row-action w-100 py-2">
-                <!-- Add HS Modal -->
 
-                <div class="modal fade" id="addHSModal" tabindex="-1" aria-labelledby="add-hs-modal" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Hardskills</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <form action="" method="POST">
-                                <div class="modal-body">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="hsname" id="floatingHsname"
-                                            placeholder="Hardskill" autocomplete="off" />
-                                        <label for="floatingHsname">Hardskill</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input type="number" class="form-control" name="hslevel" id="floatingHslevel"
-                                            placeholder="Persentase Level" autocomplete="off" min="0" max="100" />
-                                        <label for="floatingHslevel">% Level</label>
-                                    </div>
-                                    <div class="form-floating d-flex justify-content-center">
-                                    </div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="submit" class="form-control btn" name="submit_add_hs" id="submitHs"
-                                        value="Upload" />
-                                    <button type="button" class="form-control btn btn-secondary"
-                                        data-bs-dismiss="modal">Tutup</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHSModal">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
-                </a>
-            </div>
             <thead>
                 <tr>
                     <th scope="col" class="text-center">id</th>
@@ -541,6 +621,7 @@ if (isset($_POST['submit_update_ss'])) {
                     <th scope="col" class="text-center">Operasi</th>
                 </tr>
             </thead>
+
             <tbody>
                 <?php
                 $select_hs = $conn->prepare("SELECT * FROM `hardskills`");
@@ -617,50 +698,55 @@ if (isset($_POST['submit_update_ss'])) {
 
                 ?>
             </tbody>
+
         </table>
+        <div class="row-action w-100 py-2">
+            <!-- Add HS Modal -->
+
+            <div class="modal fade" id="addHSModal" tabindex="-1" aria-labelledby="add-hs-modal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Hardskills</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form action="" method="POST">
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="hsname" id="floatingHsname"
+                                        placeholder="Hardskill" autocomplete="off" />
+                                    <label for="floatingHsname">Hardskill</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" name="hslevel" id="floatingHslevel"
+                                        placeholder="Persentase Level" autocomplete="off" min="0" max="100" />
+                                    <label for="floatingHslevel">% Level</label>
+                                </div>
+                                <div class="form-floating d-flex justify-content-center">
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" class="form-control btn" name="submit_add_hs" id="submitHs"
+                                    value="Upload" />
+                                <button type="button" class="form-control btn btn-secondary"
+                                    data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHSModal">
+                <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
+            </a>
+        </div>
     </section>
     <section class="section-table table-responsive">
         <table class="table table-bordered border-danger-subtle caption-top table-striped">
             <caption>Daftar Softskill</caption>
-            <div class="row-action w-100 py-2">
-                <!-- Add SS Modal -->
 
-                <div class="modal fade" id="addSSModal" tabindex="-1" aria-labelledby="add-Ss-modal" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Softskills</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <form action="" method="POST">
-                                <div class="modal-body">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" name="ssname" id="floatingSsname"
-                                            placeholder="Softskill" autocomplete="off" />
-                                        <label for="floatingSsname">Softskill</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input type="number" class="form-control" name="sslevel" id="floatingSslevel"
-                                            placeholder="Persentase Level" autocomplete="off" min="0" max="100" />
-                                        <label for="floatingSslevel">% Level</label>
-                                    </div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="submit" class="form-control btn" name="submit_add_ss" id="submitSs"
-                                        value="Upload" />
-                                    <button type="button" class="form-control btn btn-secondary"
-                                        data-bs-dismiss="modal">Tutup</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSSModal">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
-                </a>
-            </div>
             <thead>
                 <tr>
                     <th scope="col" class="text-center">id</th>
@@ -669,6 +755,7 @@ if (isset($_POST['submit_update_ss'])) {
                     <th scope="col" class="text-center">Operasi</th>
                 </tr>
             </thead>
+
             <tbody>
                 <?php
                 $select_ss = $conn->prepare("SELECT * FROM `softskills`");
@@ -746,7 +833,47 @@ if (isset($_POST['submit_update_ss'])) {
 
                 ?>
             </tbody>
+
         </table>
+        <div class="row-action w-100 py-2">
+            <!-- Add SS Modal -->
+
+            <div class="modal fade" id="addSSModal" tabindex="-1" aria-labelledby="add-Ss-modal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambahkan Softskills</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form action="" method="POST">
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="ssname" id="floatingSsname"
+                                        placeholder="Softskill" autocomplete="off" />
+                                    <label for="floatingSsname">Softskill</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" name="sslevel" id="floatingSslevel"
+                                        placeholder="Persentase Level" autocomplete="off" min="0" max="100" />
+                                    <label for="floatingSslevel">% Level</label>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" class="form-control btn" name="submit_add_ss" id="submitSs"
+                                    value="Upload" />
+                                <button type="button" class="form-control btn btn-secondary"
+                                    data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSSModal">
+                <i class="fa-solid fa-plus"></i>&nbsp;Tambahkan
+            </a>
+        </div>
     </section>
 </div>
 
