@@ -289,35 +289,35 @@ $avatarUrl = $admin['avatar_url'];
     <!-- edit photo profile -->
     <section class="section-table table-responsive">
         <table class="table caption-top table-striped">
-            <caption>Foto Profil</caption>
+            <caption class="text-center">Foto Profil</caption>
             <thead>
             </thead>
             <tbody>
             </tbody>
         </table>
-        <div class="img-wrapper mb-3 rounded-circle" style="width: 10rem; height: 10rem">
+        <div class="img-wrapper mb-3 rounded-circle mx-auto" style="width: 10rem; height: 10rem">
             <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="avatar rounded-circle w-100 h-100">
         </div>
-
-        <div class="row-action w-100 py-2">
-            <div class="modal fade" id="add-edu-modal" tabindex="-1" aria-labelledby="add-edu-modal"
-                aria-hidden="true">
+        <div class="row-action w-100 py-2 d-flex justify-content-center">
+        <!-- Modal -->
+            <div class="modal fade" id="add-edu-modal" tabindex="-1" aria-labelledby="add-edu-modal" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="exampleModalLabel">Ganti Foto</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form action="" method="POST" class="flex flex-column p-3" enctype="multipart/form-data">
                             <label for="avatar">Ganti foto:</label>
                             <input type="file" name="avatar" required>
-                            <input type="submit" name="submit_change_avatar" class="form-control btn" value="Upload">
+                            <input type="submit" name="submit_change_avatar" class="form-control btn mt-3" value="Upload">
                         </form>
                     </div>
                 </div>
             </div>
-            <a href="" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-edu-modal">
+
+            <!-- Button Trigger Modal -->
+            <a href="#" role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-edu-modal">
                 <i class="fa-solid fa-arrows-rotate"></i>&nbsp;Ganti
             </a>
         </div>
